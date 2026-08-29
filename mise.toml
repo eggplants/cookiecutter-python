@@ -1,0 +1,94 @@
+[tools]
+gh = "latest" # [skip ci]
+pinact = "latest" # [skip ci]
+usage = "latest" # [skip ci]
+python = "latest"
+uv = "latest"
+
+[tasks.ruff]
+description = "Run Ruff"
+run = "uv format"
+
+[tasks.pymarkdown]
+description = "Run PyMarkdownLnt"
+run = "uv run pymarkdown fix README.md"
+
+[tasks.ty]
+description = "Run Ty"
+run = "uvx ty check hooks tests"
+depends = ["uv-sync"]
+
+[tasks.pytest]
+description = "Bake the template and check what comes out"
+run = "uv run pytest"
+
+[tasks.bake]
+description = "Bake the template into ./out for a look at the real thing"
+run = "uv run cookiecutter --overwrite-if-exists --output-dir ./out ."
+
+[tasks.repo-init]
+description = "Bake the template into a new private GitHub repository"
+usage = '''
+arg "[dir]" help="Where to create the project (default: the directory holding this repo)"
+'''
+run = """
+#!/usr/bin/env bash
+set -euo pipefail
+
+gh auth status >/dev/null
+
+out_dir="${usage_dir:-$(dirname "$MISE_PROJECT_ROOT")}"
+mkdir -p "$out_dir"
+
+path_file="$(mktemp)"
+trap 'rm -f "$path_file"' EXIT
+uv run python -c '
+import sys
+
+from cookiecutter.main import cookiecutter
+
+with open(sys.argv[3], "w") as handle:
+    handle.write(cookiecutter(sys.argv[1], output_dir=sys.argv[2]))
+' "$MISE_PROJECT_ROOT" "$out_dir" "$path_file"
+
+project="$(cat "$path_file")"
+cd "$project"
+
+git commit --quiet -m init
+
+description="$(python3 -c '
+import pathlib
+import tomllib
+
+print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["description"])
+')"
+
+gh repo create "$(basename "$project")" \\
+  --private --source=. --remote=origin --push --description "$description"
+
+repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+
+gh repo edit "$repo" \\
+  --enable-merge-commit --enable-squash-merge=false --enable-rebase-merge=false
+
+gh api --silent -X PUT "repos/$repo/immutable-releases"
+
+echo "created $project"
+echo "next: $project/TODO.md, the setup that still needs a human"
+"""
+
+[tasks.pyproject-fmt]
+description = "Run pyproject-fmt"
+run = "uv run pyproject-fmt ./pyproject.toml"
+
+[tasks.pre-commit]
+description = "Run checks on pre-commit"
+depends = ["ruff", "ty", "pymarkdown", "pyproject-fmt"]
+
+[tasks.ci]
+description = "Run CI checks"
+depends = ["pre-commit", "pytest"]
+
+[tasks.uv-sync]
+description = "Sync UV dependencies"
+run = "uv sync --locked"

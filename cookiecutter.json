@@ -1,0 +1,19 @@
+{
+  "project_name": "My Python Project",
+  "project_slug": "{{ cookiecutter.project_name|lower|replace(' ', '-')|replace('_', '-') }}",
+  "package_name": "{{ cookiecutter.project_slug|replace('-', '_') }}",
+  "command_name": "{{ cookiecutter.project_slug }}",
+  "project_description": "A Python project.",
+  "author_name": "eggplants",
+  "author_email": "w10776e8w@yahoo.co.jp",
+  "github_username": "eggplants",
+  "year": "{% now 'local', '%Y' %}",
+  "python_version": ["3.11", "3.12", "3.13", "3.10"],
+  "project_type": ["cli", "library"],
+  "use_docker": ["yes", "no"],
+  "use_distroless": ["no", "yes"],
+  "use_pyinstaller": ["no", "yes"],
+  "min_age": "7",
+  "__python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+  "__docker_python_version": "3.14"
+}
