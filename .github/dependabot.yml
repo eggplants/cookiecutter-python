@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      dependencies:
+        dependency-type: production
+      dev-dependencies:
+        dependency-type: development
+    cooldown:
+      default-days: 7
+  # Keeps this repo's own workflows current. The pinned SHAs inside
+  # `{{cookiecutter.project_slug}}/.github/workflows/` are invisible to
+  # Dependabot -- run `pinact run` over that directory to refresh them.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7

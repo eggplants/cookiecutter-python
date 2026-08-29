@@ -1,0 +1,96 @@
+[build-system]
+build-backend = "hatchling.build"
+requires = [ "hatchling", "uv-dynamic-versioning" ]
+
+[project]
+name = "{{ cookiecutter.project_slug }}"
+description = "{{ cookiecutter.project_description }}"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [ { name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}" } ]
+requires-python = ">={{ cookiecutter.python_version }}"
+classifiers = [
+  "Development Status :: 3 - Alpha",
+{%- if cookiecutter.project_type == "cli" %}
+  "Environment :: Console",
+{%- endif %}
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+{%- for version in cookiecutter.__python_versions if version >= cookiecutter.python_version %}
+  "Programming Language :: Python :: {{ version }}",
+{%- endfor %}
+  "Typing :: Typed",
+]
+dynamic = [ "version" ]
+dependencies = []
+urls.Repository = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
+{%- if cookiecutter.project_type == "cli" %}
+scripts.{{ cookiecutter.command_name }} = "{{ cookiecutter.package_name }}.cli:main"
+{%- endif %}
+
+[dependency-groups]
+dev = [
+  "pymarkdownlnt>=0.9.33",
+  "pyproject-fmt>=2.11.1",
+  "pytest>=9.0.2",
+  "pytest-cov>=7",
+]
+docs = [
+  "pdoc>=16",
+]
+
+[tool.hatch]
+version.source = "uv-dynamic-versioning"
+build.targets.wheel.packages = [ "{{ cookiecutter.package_name }}" ]
+build.targets.sdist.packages = [ "{{ cookiecutter.package_name }}" ]
+
+[tool.uv]
+python-downloads = "never"
+default-groups = [
+  "dev",
+  "docs",
+]
+exclude-newer = "P7D"
+preview = true
+
+[tool.ruff]
+line-length = 120
+format.indent-style = "space"
+format.quote-style = "double"
+lint.select = [ "ALL" ]
+lint.ignore = [
+  "COM812",
+  "D",
+]
+{%- set per_file_ignores = [["tests/**", [
+  '"ANN",     # Missing type annotations (tests/fixtures)',
+  '"ARG",     # Unused arguments (pytest fixtures, lambda stubs)',
+  '"CPY001",  # Missing copyright notice',
+  '"INP001",  # Implicit namespace package (no __init__ in tests)',
+  '"PLR2004", # Magic value used in comparison',
+  '"S101",    # Use of assert detected',
+]]] %}
+{%- if cookiecutter.project_type == "cli" %}
+{%- set _ = per_file_ignores.append([cookiecutter.package_name ~ "/cli.py", [
+  '"T201", # `print` found',
+]]) %}
+{%- if cookiecutter.use_pyinstaller == "yes" %}
+{%- set _ = per_file_ignores.append(["packaging/entrypoint.py", [
+  '"INP001", # Implicit namespace package (frozen entry point, not importable content)',
+]]) %}
+{%- endif %}
+{%- endif %}
+{%- for glob, codes in per_file_ignores | sort(attribute="0") %}
+lint.per-file-ignores."{{ glob }}" = [
+{%- for code in codes %}
+  {{ code }}
+{%- endfor %}
+]
+{%- endfor %}
+lint.pydocstyle.convention = "google"
+
+[tool.uv-dynamic-versioning]
+vcs = "git"
+style = "semver"
+fallback-version = "0.0.0"

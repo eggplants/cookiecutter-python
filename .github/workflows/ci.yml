@@ -1,0 +1,61 @@
+name: ci
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ["master"]
+  push:
+    tags: ["*"]
+    branches: ["master"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MISE_EXPERIMENTAL: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Drop the tools mise.toml marks as local-only
+        run: sed -i '/# \[skip ci\]/d' mise.toml
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - run: mise run ci
+
+  # The unit tests only read the generated tree. This runs the generated
+  # project's own `mise run ci`, which is the thing that actually breaks when a
+  # pinned action, a Ruff rule or a uv flag moves under the template.
+  bake:
+    name: bake ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: cli
+            answers: project_type=cli use_docker=yes use_pyinstaller=no
+          - name: library
+            answers: project_type=library use_docker=no use_pyinstaller=no
+          - name: binaries
+            answers: project_type=cli use_docker=yes use_pyinstaller=yes
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Drop the tools mise.toml marks as local-only
+        run: sed -i '/# \[skip ci\]/d' mise.toml
+      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - name: Bake the template
+        run: uvx cookiecutter --no-input --output-dir "$RUNNER_TEMP/baked" . ${{ matrix.answers }}
+      - name: Run the generated project's own CI
+        working-directory: ${{ runner.temp }}/baked/my-python-project
+        run: |
+          sed -i '/# \[skip ci\]/d' mise.toml
+          mise trust
+          mise run ci
