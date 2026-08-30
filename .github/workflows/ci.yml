@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Drop the tools mise.toml marks as local-only
         run: sed -i '/# \[skip ci\]/d' mise.toml
-      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
       - run: mise run ci
 
   # The unit tests only read the generated tree. This runs the generated
@@ -50,7 +50,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Drop the tools mise.toml marks as local-only
         run: sed -i '/# \[skip ci\]/d' mise.toml
-      - uses: jdx/mise-action@7e36c90d9ab29c415a2384db3006f3ec8a8cc654 # v4.2.4
+      - uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518 # v4.2.5
       - name: Bake the template
         run: uvx cookiecutter --no-input --output-dir "$RUNNER_TEMP/baked" . ${{ matrix.answers }}
       - name: Run the generated project's own CI
