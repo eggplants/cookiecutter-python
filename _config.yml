@@ -1,0 +1,17 @@
+exclude:
+  - "{{cookiecutter.project_slug}}"
+  - hooks
+  - tests
+  - cookiecutter.json
+  - LICENSE.txt
+  - mise.toml
+  - pyproject.toml
+  - uv.lock
+
+readme_index:
+  remove_originals: true
+
+markdown: CommonMarkGhPages
+commonmark:
+  options: ["UNSAFE", "SMART", "FOOTNOTES"]
+  extensions: ["strikethrough", "autolink", "table", "tagfilter"]
