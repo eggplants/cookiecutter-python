@@ -1,7 +1,7 @@
 [tools]
-gh = "latest" # [skip ci]
+gh = "latest"     # [skip ci]
 pinact = "latest" # [skip ci]
-usage = "latest" # [skip ci]
+usage = "latest"  # [skip ci]
 python = "latest"
 uv = "latest"
 
@@ -27,7 +27,7 @@ description = "Bake the template into ./out for a look at the real thing"
 run = "uv run cookiecutter --overwrite-if-exists --output-dir ./out ."
 
 [tasks.repo-init]
-description = "Bake the template into a new private GitHub repository"
+description = "Bake the template, optionally into a new private GitHub repository"
 usage = '''
 arg "[dir]" help="Where to create the project (default: the directory holding this repo)"
 '''
@@ -35,7 +35,16 @@ run = """
 #!/usr/bin/env bash
 set -euo pipefail
 
-gh auth status >/dev/null
+read -r -p "Create a private GitHub repository and push? [Y/n] " reply || reply=""
+if [[ "$reply" =~ ^[Nn] ]]; then
+  create_remote=false
+else
+  create_remote=true
+fi
+
+if [[ "$create_remote" == true ]]; then
+  gh auth status >/dev/null
+fi
 
 out_dir="${usage_dir:-$(dirname "$MISE_PROJECT_ROOT")}"
 mkdir -p "$out_dir"
@@ -56,26 +65,29 @@ cd "$project"
 
 git commit --quiet -m init
 
-description="$(python3 -c '
+if [[ "$create_remote" == true ]]; then
+  description="$(python3 -c '
 import pathlib
 import tomllib
 
 print(tomllib.loads(pathlib.Path("pyproject.toml").read_text())["project"]["description"])
 ')"
 
-gh repo create "$(basename "$project")" \\
-  --private --source=. --remote=origin --push --description "$description"
+  gh repo create "$(basename "$project")" \\
+    --private --source=. --remote=origin --push --description "$description"
 
-repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+  repo="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
 
-gh repo edit "$repo" \\
-  --enable-merge-commit --enable-squash-merge=false --enable-rebase-merge=false
+  gh repo edit "$repo" \\
+    --enable-merge-commit --enable-squash-merge=false --enable-rebase-merge=false
 
-gh api --silent -X PUT "repos/$repo/immutable-releases"
+  gh api --silent -X PUT "repos/$repo/immutable-releases"
+fi
 
-echo "created $project"
+echo "created: $project"
 echo "next: $project/TODO.md, the setup that still needs a human"
 """
+quiet = true
 
 [tasks.pyproject-fmt]
 description = "Run pyproject-fmt"

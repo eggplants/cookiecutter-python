@@ -15,5 +15,26 @@
   "use_pyinstaller": ["no", "yes"],
   "min_age": "7",
   "__python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
-  "__docker_python_version": "3.14"
+  "__docker_python_version": "3.14",
+  "__prompts__": {
+    "project_name": "Project name (the README heading)",
+    "project_slug": "Project slug (PyPI and repository name)",
+    "package_name": "Package name (the importable module)",
+    "command_name": "Console script name (CLI projects only)",
+    "project_description": "Project description (one line, reused in the README and the --help text)",
+    "author_name": "Author name",
+    "author_email": "Author email",
+    "github_username": "GitHub username (owner in the repository, badge and image URLs)",
+    "year": "Copyright year in LICENSE.txt",
+    "python_version": { "__prompt__": "Minimum supported Python version (classifiers are emitted up to 3.14)" },
+    "project_type": {
+      "__prompt__": "Project type",
+      "cli": "cli - adds cli.py, __main__.py and a console script",
+      "library": "library - an importable package only"
+    },
+    "use_docker": { "__prompt__": "Add a Dockerfile and the multi-arch GHCR jobs in release.yml?" },
+    "use_distroless": { "__prompt__": "Run the image on a distroless base instead of python:*-slim?" },
+    "use_pyinstaller": { "__prompt__": "Add packaging/ and build-binaries.yml for standalone binaries?" },
+    "min_age": "Days a release must age before it is used (mise installs, Dependabot cooldowns, mise run pinup)"
+  }
 }
