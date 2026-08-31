@@ -12,7 +12,10 @@ PROJECT_TYPE = "{{ cookiecutter.project_type }}"
 USE_DOCKER = "{{ cookiecutter.use_docker }}" == "yes"
 USE_PYINSTALLER = "{{ cookiecutter.use_pyinstaller }}" == "yes"
 USE_DISTROLESS = "{{ cookiecutter.use_distroless }}" == "yes"
+CREATE_GITHUB_REPO = "{{ cookiecutter.create_github_repo }}" == "yes"
 PACKAGE_NAME = "{{ cookiecutter.package_name }}"
+GITHUB_REPO = "{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
+PROJECT_DESCRIPTION = "{{ cookiecutter.project_description }}"
 
 ROOT = Path.cwd()
 
@@ -57,6 +60,39 @@ def run(*command: str) -> bool:
     return True
 
 
+def create_github_repo() -> None:
+    """Create the private repository, push to it and set the release rules."""
+    hint = "create the repository yourself; TODO.md carries the commands"
+    if not run("gh", "auth", "status"):
+        note(hint)
+        return
+    created = run(
+        "gh",
+        "repo",
+        "create",
+        GITHUB_REPO,
+        "--private",
+        "--source=.",
+        "--remote=origin",
+        "--push",
+        "--description",
+        PROJECT_DESCRIPTION,
+    )
+    if not created:
+        note(hint)
+        return
+    run(
+        "gh",
+        "repo",
+        "edit",
+        GITHUB_REPO,
+        "--enable-merge-commit",
+        "--enable-squash-merge=false",
+        "--enable-rebase-merge=false",
+    )
+    run("gh", "api", "--silent", "-X", "PUT", f"repos/{GITHUB_REPO}/immutable-releases")
+
+
 def main() -> None:
     """Prune and prime the freshly generated project."""
     library = PROJECT_TYPE == "library"
@@ -83,8 +119,12 @@ def main() -> None:
         return
     # `uv lock` first, so the lock file lands in the initial `git add`.
     run("uv", "lock", "--quiet")
-    if run("git", "init", "--initial-branch=master", "--quiet"):
-        run("git", "add", "--all")
+    if not run("git", "init", "--initial-branch=master", "--quiet"):
+        return
+    if not (run("git", "add", "--all") and run("git", "commit", "--quiet", "-m", "init")):
+        return
+    if CREATE_GITHUB_REPO:
+        create_github_repo()
 
 
 if __name__ == "__main__":

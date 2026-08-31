@@ -157,12 +157,20 @@ def test_per_file_ignores_come_out_sorted(bake, project_name):
 
 def test_todo_lists_the_setup_that_needs_a_human(bake):
     todo = (bake(project_name="Bin Proj", use_pyinstaller="yes") / "TODO.md").read_text(encoding="utf-8")
-    assert todo.count("- [ ] ") == 4
+    assert todo.count("- [ ] ") == 5
     assert "- [x]" not in todo
+    assert "gh repo create eggplants/bin-proj" in todo
     assert "gh repo edit eggplants/bin-proj" in todo
     assert "gh api -X POST '/repos/eggplants/bin-proj/pages'" in todo
     assert "oidc-in-pypi" in todo
     assert "build-binaries.yml" in todo
+
+
+def test_todo_drops_the_repository_step_once_the_hook_created_it(bake):
+    todo = (bake(project_name="Bin Proj", create_github_repo="yes") / "TODO.md").read_text(encoding="utf-8")
+    assert todo.count("- [ ] ") == 4
+    assert "gh repo create" not in todo
+    assert "created the repository" in todo
 
 
 def test_github_expressions_survive_rendering(bake):

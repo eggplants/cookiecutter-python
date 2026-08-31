@@ -11,24 +11,17 @@ A [Cookiecutter](https://cookiecutter.readthedocs.io/) template for eggplants' P
 ## Usage
 
 ```bash
-# simple
-uvx cookiecutter gh:eggplants/cookiecutter-python
+# uvx
+uvx cookiecutter gh:eggplants/cookiecutter-python -o path/to/dir
 
-# with args
-uvx cookiecutter --no-input gh:eggplants/cookiecutter-python \
-  project_name="Deep Fried Eggplant" project_type=cli use_docker=yes
-
-# create a private gh repo and push first commit
-git clone https://github.com/eggplants/cookiecutter-python
-cd cookiecutter-python
-mise run repo-init
+# mise
+mise use -g cookiecutter
+cookiecutter gh:eggplants/cookiecutter-python -o path/to/dir
 ```
 
 ## Prompts
 
-<details>
-
-| Variable | Default | Notes |
+| [Prompt](https://cookiecutter.readthedocs.io/en/stable/tutorials/tutorial1.html#cookiecutter-json) | Default | [`__prompts__`](https://cookiecutter.readthedocs.io/en/stable/advanced/human_readable_prompts.html#) |
 | --- | --- | --- |
 | `project_name` | `My Python Project` | Human-readable title, used in the README heading |
 | `project_slug` | derived | PyPI and repository name, e.g. `my-python-project` |
@@ -45,8 +38,7 @@ mise run repo-init
 | `use_distroless` | `no` | Runs the image on a distroless base instead of `python:*-slim` |
 | `use_pyinstaller` | `no` | `packaging/` plus `build-binaries.yml` for standalone binaries |
 | `min_age` | `7` | Days a release must age before it is used: `mise` installs, Dependabot cooldowns and `mise run pinup` |
-
-</details>
+| `create_github_repo` | `no` | `yes` makes the post-generation hook `gh repo create` the private repository, push the first commit, restrict merges to merge commits and turn immutable releases on |
 
 ## License
 

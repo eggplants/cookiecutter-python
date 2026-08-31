@@ -1,11 +1,31 @@
 {%- set repo = cookiecutter.github_username ~ "/" ~ cookiecutter.project_slug -%}
 {%- set docker = cookiecutter.use_docker == "yes" and cookiecutter.project_type == "cli" -%}
 {%- set binaries = cookiecutter.use_pyinstaller == "yes" and cookiecutter.project_type == "cli" -%}
+{%- set remote = cookiecutter.create_github_repo == "yes" -%}
 # TODO
 
-`mise run repo-init` created the repository, turned immutable releases on and
-left merge commits as the only way to land a pull request. What is left needs
-a human. Each step assumes the ones above it are done.
+{% if remote -%}
+The template's post-generation hook created the repository, turned immutable
+releases on and left merge commits as the only way to land a pull request. What
+is left needs a human.
+{%- else -%}
+The template's post-generation hook committed the project; everything past that
+needs a human.
+{%- endif %} Each step assumes the ones above it are done.
+{%- if not remote %}
+
+- [ ] Create the repository and push, then leave merge commits as the only way
+  to land a pull request and turn immutable releases on.
+
+  ```bash
+  gh repo create {{ repo }} \
+    --private --source=. --remote=origin --push \
+    --description "{{ cookiecutter.project_description }}"
+  gh repo edit {{ repo }} \
+    --enable-merge-commit --enable-squash-merge=false --enable-rebase-merge=false
+  gh api --silent -X PUT '/repos/{{ repo }}/immutable-releases'
+  ```
+{%- endif %}
 
 - [ ] Register the trusted publisher on PyPI, so the `pypi` job can
   `uv publish` without an API token. Add a pending publisher for the project

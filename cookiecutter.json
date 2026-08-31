@@ -14,6 +14,7 @@
   "use_distroless": ["no", "yes"],
   "use_pyinstaller": ["no", "yes"],
   "min_age": "7",
+  "create_github_repo": ["no", "yes"],
   "__python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
   "__docker_python_version": "3.14",
   "__prompts__": {
@@ -35,6 +36,9 @@
     "use_docker": { "__prompt__": "Add a Dockerfile and the multi-arch GHCR jobs in release.yml?" },
     "use_distroless": { "__prompt__": "Run the image on a distroless base instead of python:*-slim?" },
     "use_pyinstaller": { "__prompt__": "Add packaging/ and build-binaries.yml for standalone binaries?" },
-    "min_age": "Days a release must age before it is used (mise installs, Dependabot cooldowns, mise run pinup)"
+    "min_age": "Days a release must age before it is used (mise installs, Dependabot cooldowns, mise run pinup)",
+    "create_github_repo": {
+      "__prompt__": "Create the private GitHub repository with `gh` and push the first commit?"
+    }
   }
 }
