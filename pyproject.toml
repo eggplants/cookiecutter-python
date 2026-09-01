@@ -20,7 +20,7 @@ urls.Repository = "https://github.com/eggplants/cookiecutter-python"
 dev = [
   "cookiecutter>=2.6",
   "pymarkdownlnt>=0.9.33",
-  "pyproject-fmt>=2.11.1",
+  "pyproject-fmt>=2.28.1",
   "pytest>=9.0.2",
   "pyyaml>=6",
 ]
