@@ -6,6 +6,11 @@ requires = [ "hatchling", "uv-dynamic-versioning" ]
 name = "{{ cookiecutter.project_slug }}"
 description = "{{ cookiecutter.project_description }}"
 readme = "README.md"
+keywords = [
+{%- for keyword in cookiecutter.project_keywords.split(",") if keyword.strip() %}
+  "{{ keyword.strip() }}",
+{%- endfor %}
+]
 license = { text = "MIT" }
 authors = [ { name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}" } ]
 requires-python = ">={{ cookiecutter.python_version }}"
@@ -14,6 +19,7 @@ classifiers = [
 {%- if cookiecutter.project_type == "cli" %}
   "Environment :: Console",
 {%- endif %}
+  "Intended Audience :: Developers",
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
   "Programming Language :: Python :: 3 :: Only",
@@ -24,6 +30,8 @@ classifiers = [
 ]
 dynamic = [ "version" ]
 dependencies = []
+urls.Documentation = "https://{{ cookiecutter.github_username }}.github.io/{{ cookiecutter.project_slug }}/"
+urls.Issues = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}/issues"
 urls.Repository = "https://github.com/{{ cookiecutter.github_username }}/{{ cookiecutter.project_slug }}"
 {%- if cookiecutter.project_type == "cli" %}
 scripts.{{ cookiecutter.command_name }} = "{{ cookiecutter.package_name }}.cli:main"

@@ -133,9 +133,16 @@ def test_binaries_take_over_creating_the_release(bake):
     parse_every_python_file(project)
 
     workflows = parse_every_workflow(project)
-    assert workflows["release.yml"][True] == {"release": {"types": ["published"]}}
-    assert "release" not in workflows["release.yml"]["jobs"]
-    assert "needs" not in workflows["release.yml"]["jobs"]["pypi"]
+    release = workflows["release.yml"]
+    # An event raised by GITHUB_TOKEN never starts another workflow, so publishing the
+    # draft from build-binaries leaves `release: [published]` unheard. `workflow_run`
+    # is exempt from that rule, and `resolve` works out the tag whichever fired.
+    assert release[True]["release"] == {"types": ["published"]}
+    assert release[True]["workflow_run"] == {"workflows": ["build-binaries"], "types": ["completed"]}
+    assert "workflow_dispatch" in release[True]
+    assert "release" not in release["jobs"]
+    assert release["jobs"]["pypi"]["needs"] == "resolve"
+    assert release["jobs"]["ghcr-merge"]["needs"] == ["resolve", "ghcr"]
 
     binaries = workflows["build-binaries.yml"]
     assert binaries["jobs"]["release"]["needs"] == "build"

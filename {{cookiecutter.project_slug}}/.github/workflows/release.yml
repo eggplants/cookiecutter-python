@@ -1,18 +1,26 @@
 {%- set docker = cookiecutter.use_docker == "yes" and cookiecutter.project_type == "cli" -%}
 {%- set on_release = cookiecutter.use_pyinstaller == "yes" and cookiecutter.project_type == "cli" -%}
-{%- set tag_ref = '${{ github.event.release.tag_name }}' if on_release else '${{ github.ref_name }}' -%}
+{%- set tag_ref = '${{ needs.resolve.outputs.tag }}' if on_release else '${{ github.ref_name }}' -%}
+{%- set release_dep = 'resolve' if on_release else 'release' -%}
+{%- set merge_dep = '[resolve, ghcr]' if on_release else 'ghcr' -%}
 {%- raw -%}
 name: release
 {%- endraw %}
 {%- if on_release %}
 {%- raw %}
 
-# `build-binaries.yml` is what creates the release: it attaches the binaries to a
-# draft and publishes it afterwards, because immutable releases lock the assets
-# of an already published release.
 on:
   release:
     types: [published]
+  workflow_run:
+    workflows: [build-binaries]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: The release tag to publish, e.g. v0.0.1
+        required: true
+        type: string
 {%- endraw %}
 {%- else %}
 {%- raw %}
@@ -30,7 +38,37 @@ permissions:
 
 jobs:
 {%- endraw %}
-{%- if not on_release %}
+{%- if on_release %}
+{%- raw %}
+  resolve:
+    name: resolve the tag
+    if: >-
+      github.event_name != 'workflow_run'
+      || (github.event.workflow_run.conclusion == 'success'
+          && startsWith(github.event.workflow_run.head_branch, 'v'))
+    runs-on: ubuntu-latest
+    permissions: {}
+    outputs:
+      tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - id: tag
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RUN_TAG: ${{ github.event.workflow_run.head_branch }}
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          case "${{ github.event_name }}" in
+            release) tag="$RELEASE_TAG" ;;
+            workflow_run) tag="$RUN_TAG" ;;
+            workflow_dispatch) tag="$INPUT_TAG" ;;
+          esac
+          if [ -z "$tag" ]; then
+            echo "could not work out which tag to release" >&2
+            exit 1
+          fi
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+{% endraw %}
+{%- else %}
 {%- raw %}
   release:
     runs-on: ubuntu-latest
@@ -47,11 +85,7 @@ jobs:
 {%- raw %}
   pypi:
 {%- endraw %}
-{%- if not on_release %}
-{%- raw %}
-    needs: release
-{%- endraw %}
-{%- endif %}
+    needs: {{ release_dep }}
 {%- raw %}
     runs-on: ubuntu-latest
     environment:
@@ -82,11 +116,7 @@ jobs:
   ghcr:
     name: build ${{ matrix.platform }}
 {%- endraw %}
-{%- if not on_release %}
-{%- raw %}
-    needs: release
-{%- endraw %}
-{%- endif %}
+    needs: {{ release_dep }}
 {%- raw %}
     runs-on: ${{ matrix.os }}
     permissions:
@@ -140,7 +170,9 @@ jobs:
 
   ghcr-merge:
     name: push multi-arch manifest
-    needs: ghcr
+{%- endraw %}
+    needs: {{ merge_dep }}
+{%- raw %}
     runs-on: ubuntu-latest
     permissions:
       contents: read
