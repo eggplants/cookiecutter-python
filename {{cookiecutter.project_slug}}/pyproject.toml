@@ -6,11 +6,16 @@ requires = [ "hatchling", "uv-dynamic-versioning" ]
 name = "{{ cookiecutter.project_slug }}"
 description = "{{ cookiecutter.project_description }}"
 readme = "README.md"
+{% set keyword_list = cookiecutter.project_keywords.split(",") | map("trim") | reject("equalto", "") | unique | sort | list -%}
+{% if keyword_list -%}
 keywords = [
-{%- for keyword in cookiecutter.project_keywords.split(",") if keyword.strip() %}
-  "{{ keyword.strip() }}",
+{%- for keyword in keyword_list %}
+  "{{ keyword }}",
 {%- endfor %}
 ]
+{% else -%}
+keywords = []
+{% endif -%}
 license = { text = "MIT" }
 authors = [ { name = "{{ cookiecutter.author_name }}", email = "{{ cookiecutter.author_email }}" } ]
 requires-python = ">={{ cookiecutter.python_version }}"

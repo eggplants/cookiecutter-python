@@ -65,6 +65,17 @@ def test_names_are_derived_from_the_project_name(bake):
     assert pyproject["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"] == ["deep_fried_eggplant"]
 
 
+def test_keywords_are_sorted_and_stay_pyproject_fmt_clean(bake):
+    # pyproject-fmt writes an empty list inline, so `keywords = [\n]` fails
+    # `mise run ci` in the generated project -- and it sorts what is in there.
+    empty = (bake() / "pyproject.toml").read_text(encoding="utf-8")
+    assert "keywords = []\n" in empty
+    assert tomllib.loads(empty)["project"]["keywords"] == []
+
+    filled = bake(project_keywords="zebra, cli , manga,cli") / "pyproject.toml"
+    assert tomllib.loads(filled.read_text(encoding="utf-8"))["project"]["keywords"] == ["cli", "manga", "zebra"]
+
+
 def test_python_version_sets_the_floor_and_the_classifiers(bake):
     pyproject = tomllib.loads((bake(python_version="3.12") / "pyproject.toml").read_text(encoding="utf-8"))
     assert pyproject["project"]["requires-python"] == ">=3.12"
