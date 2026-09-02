@@ -10,8 +10,9 @@ TEMPLATE = Path(__file__).resolve().parent.parent
 
 @pytest.fixture(autouse=True)
 def _no_priming(monkeypatch):
-    """Keep `git init` and `uv lock` out of the test suite."""
+    """Keep `git init`, `uv lock` and the PyPI lookup out of the test suite."""
     monkeypatch.setenv("COOKIECUTTER_NO_PRIME", "1")
+    monkeypatch.setenv("COOKIECUTTER_NO_PYPI_CHECK", "1")
 
 
 @pytest.fixture

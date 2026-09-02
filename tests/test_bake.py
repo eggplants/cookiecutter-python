@@ -204,6 +204,15 @@ def test_invalid_names_are_refused(bake, field, value):
         bake(**{field: value})
 
 
+def test_a_taken_pypi_name_is_reported_but_not_refused(bake, monkeypatch, capfd):
+    """The lookup runs for real; an unreachable PyPI says so instead of failing."""
+    monkeypatch.delenv("COOKIECUTTER_NO_PYPI_CHECK")
+    project = bake(project_name="requests")
+    assert project.is_dir()
+    stderr = capfd.readouterr().err
+    assert "already taken on PyPI" in stderr or "could not be reached" in stderr
+
+
 @pytest.mark.parametrize(
     ("project_type", "sections"),
     [("cli", ["Installation", "CLI", "Library", "License"]), ("library", ["Installation", "Library", "License"])],
