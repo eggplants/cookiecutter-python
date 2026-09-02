@@ -117,8 +117,10 @@ def main() -> None:
     # would spend far longer in git and the network than in the assertions.
     if os.environ.get("COOKIECUTTER_NO_PRIME"):
         return
-    # `uv lock` first, so the lock file lands in the initial `git add`.
+    # `uv lock` and `mise run pinup` first, so the lock file and the pinned
+    # digests land in the initial `git add`.
     run("uv", "lock", "--quiet")
+    run("mise", "run", "pinup")
     if not run("git", "init", "--initial-branch=master", "--quiet"):
         return
     if not (run("git", "add", "--all") and run("git", "commit", "--quiet", "-m", "init")):
