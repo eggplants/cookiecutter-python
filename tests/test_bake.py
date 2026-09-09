@@ -1,15 +1,17 @@
 from __future__ import annotations
 
+import ast
 import datetime
 import re
 import tomllib
-
-import ast
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 import yaml
 from cookiecutter.exceptions import FailedHookException
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def parse_every_python_file(root: Path) -> None:
@@ -197,7 +199,7 @@ def test_github_expressions_survive_rendering(bake):
 
 
 def test_the_license_year_defaults_to_this_year(bake):
-    this_year = str(datetime.datetime.now(tz=datetime.timezone.utc).year)
+    this_year = str(datetime.datetime.now(tz=datetime.UTC).year)
     assert f"Copyright (c) {this_year} eggplants" in (bake() / "LICENSE.txt").read_text(encoding="utf-8")
 
 

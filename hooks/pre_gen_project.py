@@ -70,7 +70,7 @@ def main() -> None:
         )
     if not PACKAGE_NAME.isidentifier() or keyword.iskeyword(PACKAGE_NAME):
         fail(f"package_name {PACKAGE_NAME!r} is not a valid Python module name")
-    if PACKAGE_NAME != PACKAGE_NAME.lower():
+    if PACKAGE_NAME.lower() != PACKAGE_NAME:
         fail(f"package_name {PACKAGE_NAME!r} must be lowercase")
     if not COMMAND_RE.match(COMMAND_NAME):
         fail(f"command_name {COMMAND_NAME!r} is not a valid console script name")

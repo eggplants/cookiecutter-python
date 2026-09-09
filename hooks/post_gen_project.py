@@ -93,8 +93,8 @@ def create_github_repo() -> None:
     run("gh", "api", "--silent", "-X", "PUT", f"repos/{GITHUB_REPO}/immutable-releases")
 
 
-def main() -> None:
-    """Prune and prime the freshly generated project."""
+def prune() -> None:
+    """Delete the files this configuration has no use for."""
     library = PROJECT_TYPE == "library"
     if library:
         remove(*CLI_ONLY)
@@ -113,10 +113,9 @@ def main() -> None:
     if not pyinstaller:
         remove(*PYINSTALLER_ONLY)
 
-    # The template's own test suite bakes dozens of projects; priming each one
-    # would spend far longer in git and the network than in the assertions.
-    if os.environ.get("COOKIECUTTER_NO_PRIME"):
-        return
+
+def prime() -> None:
+    """Lock the dependencies, pin the actions and make the first commit."""
     # `uv lock` and `mise run pinup` first, so the lock file and the pinned
     # digests land in the initial `git add`.
     run("uv", "lock", "--quiet")
@@ -127,6 +126,16 @@ def main() -> None:
         return
     if CREATE_GITHUB_REPO:
         create_github_repo()
+
+
+def main() -> None:
+    """Prune and prime the freshly generated project."""
+    prune()
+    # The template's own test suite bakes dozens of projects; priming each one
+    # would spend far longer in git and the network than in the assertions.
+    if os.environ.get("COOKIECUTTER_NO_PRIME"):
+        return
+    prime()
 
 
 if __name__ == "__main__":
