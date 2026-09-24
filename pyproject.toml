@@ -25,6 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
   "Topic :: Software Development :: Code Generators",
   "Topic :: Utilities",
 ]
@@ -37,7 +38,7 @@ urls.Repository = "https://github.com/eggplants/cookiecutter-python"
 dev = [
   "cookiecutter>=2.6",
   "pymarkdownlnt>=0.9.33",
-  "pyproject-fmt>=2.11.1",
+  "pyproject-fmt-py>=0",
   "pytest>=9.0.2",
   "pyyaml>=6",
 ]
@@ -45,6 +46,8 @@ dev = [
 [tool.uv]
 python-downloads = "never"
 exclude-newer = "P7D"
+# Own package: no cooldown needed.
+exclude-newer-package = { pyproject-fmt-py = "P0D" }
 package = false
 preview = true
 
