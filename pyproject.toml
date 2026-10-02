@@ -68,6 +68,10 @@ lint.per-file-ignores."hooks/*.py" = [
   "PLR0133", # Two constants compared (the left side is a Jinja placeholder, not a constant)
   "T201",    # `print` found (hook output is the user-facing feedback)
 ]
+lint.per-file-ignores."scripts/*.py" = [
+  "INP001", # Implicit namespace package (run as a script by `mise run update-tmp-deps`)
+  "T201",   # `print` found (progress goes to stderr)
+]
 lint.per-file-ignores."tests/**" = [
   "ANN",     # Missing type annotations (tests/fixtures)
   "ARG",     # Unused arguments (pytest fixtures)
