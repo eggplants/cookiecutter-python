@@ -32,7 +32,7 @@ cookiecutter gh:eggplants/cookiecutter-python -o path/to/dir
 | `author_email` | | |
 | `github_username` | `eggplants` | Owner in the repository, badge and image URLs |
 | `year` | the current year | Copyright year in `LICENSE.txt` |
-| `python_version` | `3.11` | The floor; classifiers are emitted up to 3.14 |
+| `python_version` | `3.11` | The floor; classifiers are emitted up to 3.15 |
 | `project_type` | `cli` | `cli` adds `cli.py`, `__main__.py` and a console script; `library` does not |
 | `use_docker` | `yes` | `Dockerfile` plus the multi-arch GHCR jobs in `release.yml` |
 | `use_distroless` | `no` | Runs the image on a distroless base instead of `python:*-slim` |

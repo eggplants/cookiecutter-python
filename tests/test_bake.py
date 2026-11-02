@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-import datetime
+import datetime as dt
 import re
 import tomllib
 from typing import TYPE_CHECKING
@@ -86,7 +86,7 @@ def test_python_version_sets_the_floor_and_the_classifiers(bake):
         for classifier in pyproject["project"]["classifiers"]
         if classifier.startswith("Programming Language :: Python :: 3.")
     ]
-    assert versions == ["3.12", "3.13", "3.14"]
+    assert versions == ["3.12", "3.13", "3.14", "3.15"]
 
 
 def test_library_projects_have_no_cli_docker_or_binaries(bake):
@@ -199,7 +199,7 @@ def test_github_expressions_survive_rendering(bake):
 
 
 def test_the_license_year_defaults_to_this_year(bake):
-    this_year = str(datetime.datetime.now(tz=datetime.UTC).year)
+    this_year = str(dt.datetime.now(tz=dt.UTC).year)
     assert f"Copyright (c) {this_year} eggplants" in (bake() / "LICENSE.txt").read_text(encoding="utf-8")
 
 

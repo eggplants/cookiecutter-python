@@ -16,7 +16,7 @@
   "use_pyinstaller": ["no", "yes"],
   "min_age": "7",
   "create_github_repo": ["no", "yes"],
-  "__python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14"],
+  "__python_versions": ["3.10", "3.11", "3.12", "3.13", "3.14", "3.15"],
   "__docker_python_version": "3.14",
   "__prompts__": {
     "project_name": "Project name (the README heading)",
@@ -29,7 +29,7 @@
     "author_email": "Author email",
     "github_username": "GitHub username (owner in the repository, badge and image URLs)",
     "year": "Copyright year in LICENSE.txt",
-    "python_version": { "__prompt__": "Minimum supported Python version (classifiers are emitted up to 3.14)" },
+    "python_version": { "__prompt__": "Minimum supported Python version (classifiers are emitted up to 3.15)" },
     "project_type": {
       "__prompt__": "Project type",
       "cli": "cli - adds cli.py, __main__.py and a console script",
